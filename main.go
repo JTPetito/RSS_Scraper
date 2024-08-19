@@ -16,7 +16,7 @@ import (
 )
 
 type apiConfig struct {
-	BE *database.Queries
+	DB *database.Queries
 }
 
 func main() {
@@ -35,11 +35,11 @@ func main() {
 
 	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatal("Can't connect to database")
+		log.Fatal("Can't connect to database", err)
 	}
 
 	apiCfg := apiConfig{
-		DB: 
+		DB: database.New(conn),
 	}
 
 	router := chi.NewRouter()
@@ -56,6 +56,7 @@ func main() {
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handleErr)
+	v1Router.Post("/users", apiCfg.handlerCreateUser)
 
 	router.Mount("/v1", v1Router)
 
